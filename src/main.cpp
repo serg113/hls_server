@@ -1,5 +1,3 @@
-
-
 #include "LiveStream.h"
 #include "NetworkService.h"
 #include "utils.h"
@@ -14,10 +12,32 @@ void run_app(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
+	/*
+	 * in case of all functionality successfully tested
+	 * run app
+	 */
 	//run_app(argc, argv);
 
-	testSocket();
+	/* 
+	 * call from any terminal 
+	 * 
+	 *    curl localhost:7070/frames-l-http://192.168.99.1:8000/media/live-
+	 * or
+	 *    curl localhost:7070/record-l-http://192.168.99.1:8000/media/live-
+	 */
+	testSocket(); 
+
+	/*
+	 * for runninng live stream server we can run this test 
+	 * functions calls is hardcoded with parameters 
+	 *		http://192.168.99.1:8000/media/live
+	 *		./media/jpeg/
+	 *		./media/video/
+	 *
+	 */
 	//testLiveStream();
+
+	// base64 encoding - decoding test, from boost library
 	//testBase64();
 }
 

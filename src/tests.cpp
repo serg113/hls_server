@@ -34,15 +34,21 @@ void testBase64()
 }
 
 
-void runAllTests() {};
-
 void testSocket()
 {
 	try {
 		NetworkService service;
 		service.waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
 		if (service.connectionIsEstablishedAndAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
+		{
 			std::cout << "connection test passed" << std::endl;
+			if (service.routPathEquals("/frames"))
+				std::cout << "routing passed from user: /frames" << std::endl;
+			if (service.routPathEquals("/record"))
+				std::cout << "routing passed from user: /record" << std::endl;
+
+			std::cout << "live link is : " << service.liveStreamUrl() << std::endl;
+		}
 		
 	}
 	catch (const std::exception & ex)
