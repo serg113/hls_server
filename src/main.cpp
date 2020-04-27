@@ -1,11 +1,16 @@
-#include "LiveStream.h"
-#include "TrustedSocket.h"
+//#define _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
+//#define  _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 
+#include "LiveStream.h"
+#include "NetworkService.h"
+#include "utils.h"
 #include "tests.h"
 
 #include <string>
 #include <vector>
 #include <map>
+
+
 
 void run_app(int argc, char* argv[]);
 
@@ -13,7 +18,8 @@ int main(int argc, char* argv[])
 {
 	//run_app(argc, argv);
 
-	runAllTests();
+	testSocket();
+	//runAllTests();
 }
 
 void run_app(int argc, char* argv[])
@@ -21,27 +27,34 @@ void run_app(int argc, char* argv[])
 	std::string jpegFolder = "./media/jpeg/";
 	std::string videoFolder = "./media/video/";
 
-	std::map<std::string, std::string> users = { {"root", "hash777"} };
+	createFolderIfNotExist(jpegFolder);
+	createFolderIfNotExist(videoFolder);
 
-	std::vector<std::string> domainsToAccept = { "127.0.0.1", "192.168.99.1" };
+	std::map<std::string, std::string> existedUsersCredentials = { {"root", "hash777"} };
+
+	std::vector<std::string> trustedDomains = { "127.0.0.1", "192.168.99.1" };
 
 	if (argc > 2 && argv[1] == "--trusted")
 	{
 		for (int i = 2; i < argc; ++i)
-			domainsToAccept.push_back(argv[i]);
+			trustedDomains.push_back(argv[i]);
 	}
 
-	TrustedSocket socket(domainsToAccept); // running on port 7070
 
-	// this is a super-super socket // violates single responsibility principle
-	socket.listenAndAuthenticateAndSetRoutAndSetURL(users);
+	NetworkService service;
 
-	LiveStream liveStream(socket.liveStreamUrl());
+	service.waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
 
-	if (socket.routPathIs("/frames"))
-		liveStream.saveFramesAsJpeg(jpegFolder);
+	if (service.connectionEstablishedAndAuthenticated(existedUsersCredentials))
+	{
+		LiveStream liveStream(service.liveStreamUrl());
 
-	if (socket.routPathIs("/record"))
-		liveStream.saveFramesAsVideo(videoFolder);
+		if (service.routPathEquals("/frames"))
+			liveStream.saveFramesAsJpeg(jpegFolder);
+
+		if (service.routPathEquals("/record"))
+			liveStream.saveFramesAsVideo(videoFolder);
+	}
+	
 
 }

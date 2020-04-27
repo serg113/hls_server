@@ -3,7 +3,9 @@
 
 void runAllTests();
 
-bool testCreatingLiveStream();
+void testSocket();
+
+void testLiveStream();
 
 bool testSavingLiveStreamAsJpeg();
 
