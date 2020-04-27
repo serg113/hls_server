@@ -7,48 +7,28 @@ using namespace boost::asio;
 
 void NetworkService::waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains) 
 { 
+	// a lot of mess
 	io_service* service = new io_service(); // make shared
-
 	ip::tcp::acceptor acceptor_server(*service, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
-
 	socket_ptr server_socket = new ip::tcp::socket(*service); // make shared
 
 	acceptor_server.accept(*server_socket);
 
-	std::string connectionAddress = server_socket->remote_endpoint().address().to_string();
-
-	for (auto addr : trustedDomains) {
-		if (addr == connectionAddress){
-			std::cout << addr << "==" << connectionAddress << std::endl;
-			serverSocket_ = server_socket;
-		}
-	}
+	initConnectionIfTrusted(trustedDomains, server_socket);
 };
 
-bool NetworkService::connectionEstablishedAndAuthenticated(const std::map<std::string, std::string>& knownUsers)
+bool NetworkService::connectionIsEstablishedAndAuthenticated(const std::map<std::string, std::string>& knownUsers)
 {
-	// check if connected user is in knownUsers, then read commands and set rout and stream link
-	streambuf buf;
+	std::string requestString = readRequestString(); // curl localhost:7070/frames-l-http://192.168.99.1:8000/media/live-
 
-	read_until(*serverSocket_, buf, "\n");
-
-	std::string data = buffer_cast<const char*>(buf.data());
-	std::cout << data << std::endl;
-
-	// curl localhost:7070/frames-l-http://192.168.99.1:8000/media/live-
-	auto rout = data.substr(data.find('/'), 7); // "/frames" or "/record"
-	std::cout << "rout: " << rout << std::endl;
-
-	size_t linkLength = data.find("-", data.find("-l-") + 3) - (data.find("-l-") + 3);
-	auto link = data.substr(data.find("-l-") + 3, linkLength);
-
-	std::cout << "link: " << link << std::endl; // http://192.168.99.1:8000/media/live
-
-	routingPath_ = rout;
-	liveStreamUrl_ = link;
-
+	if (knownUsers.at(extractUserLogin(requestString)) == extractUserPassword(requestString))
+	{
+		routingPath_ = extractRoutingPath(requestString); // "/frames" or "/record"
+		liveStreamUrl_ = extractStreamLink(requestString); // http://192.168.99.1:8000/media/live
+	}
 	return true;
 }
+
 
 std::string NetworkService::liveStreamUrl() const
 {
@@ -58,4 +38,45 @@ std::string NetworkService::liveStreamUrl() const
 bool NetworkService::routPathEquals(const std::string& routPath) const
 {
 	return routingPath_ == routPath;
+}
+
+std::string NetworkService::readRequestString() const
+{
+	streambuf buf;
+	read_until(*serverSocket_, buf, "\n");
+	return buffer_cast<const char*>(buf.data());;
+}
+
+void NetworkService::initConnectionIfTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket)
+{
+	std::string connectionAddress = socket->remote_endpoint().address().to_string();
+
+	for (auto addr : trustedDomains) {
+		if (addr == connectionAddress) {
+			serverSocket_ = socket;
+		}
+	}
+}
+
+
+std::string NetworkService::extractUserLogin(const std::string& requestString) const
+{
+	return "root"; // only available user
+}
+
+std::string NetworkService::extractUserPassword(const std::string& requestString) const
+{
+	return "cm9vdDEyMzQ1NgDMzMzMzA=="; //"root123456"
+}
+
+std::string NetworkService::extractRoutingPath(const std::string& requestString) const
+{
+	return requestString.substr(requestString.find('/'), 7); // "/frames" or "/record"
+}
+
+std::string NetworkService::extractStreamLink(const std::string& requestString) const
+{
+	size_t linkLength = requestString.find("-", requestString.find("-l-") + 3) - (requestString.find("-l-") + 3);
+	auto link = requestString.substr(requestString.find("-l-") + 3, linkLength);
+	return link;  // http://192.168.99.1:8000/media/live
 }

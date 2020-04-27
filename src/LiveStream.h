@@ -13,12 +13,12 @@ public:
 	void saveFramesAsVideo(const std::string& videoFolder) const;
 
 private:
-	std::unique_ptr<cv::VideoCapture> openStream() const;
-	void saveAsJpeg(std::unique_ptr<cv::VideoCapture> stream, const std::string& jpegFolder) const;
-	void saveAsMp4(std::unique_ptr<cv::VideoCapture> stream, const std::string& jpegFolder) const;
+	cv::VideoCapture openStream() const;
+	void saveAsJpeg(cv::VideoCapture& stream, const std::string& jpegFolder) const;
+	void saveAsMp4(cv::VideoCapture& stream, const std::string& videoFolder) const;
 
 	std::string generateImageName(const std::string& jpegFolder, size_t index) const;
-	std::string generateVideoName(const std::string& jpegFolder, size_t index) const;
+	std::string generateVideoName(const std::string& videoFolder, size_t index) const;
 
 	std::string liveStreamUrl_;
 

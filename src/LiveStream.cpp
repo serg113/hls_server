@@ -7,30 +7,33 @@ LiveStream::LiveStream(const std::string& liveStreamUrl) : liveStreamUrl_(liveSt
 
 void LiveStream::saveFramesAsJpeg(const std::string& jpegFolder) const
 {
-	saveAsJpeg(openStream(), jpegFolder);
+	auto stream = openStream();
+	saveAsJpeg(stream, jpegFolder);
 }
 
 void LiveStream::saveFramesAsVideo(const std::string& videoFolder) const
 {
-	saveAsMp4(openStream(), videoFolder);
+	auto stream = openStream();
+	saveAsMp4(stream, videoFolder);
 }
 
-std::unique_ptr<cv::VideoCapture> LiveStream::openStream() const
+cv::VideoCapture LiveStream::openStream() const
 {
-	auto stream = std::make_unique< cv::VideoCapture>(liveStreamUrl_);
+	cv::VideoCapture stream(liveStreamUrl_);
 
-	if (!stream->isOpened()) {
+	if (!stream.isOpened()) {
 		throw std::exception("cannot open live stream");
 	}
 	return stream;
 }
 
-void LiveStream::saveAsJpeg(std::unique_ptr<cv::VideoCapture> stream, const std::string& jpegFolder) const
+void LiveStream::saveAsJpeg(cv::VideoCapture& stream, const std::string& jpegFolder) const
+
 {
 	cv::Mat frame;
 
 	for (size_t i = 0; i < 100; ++i) { // for cycle is for testing purposes
-		if (!stream->read(frame)) {
+		if (!stream.read(frame)) {
 			throw std::exception("cannot read frame");
 		}
 		std::string imageName = generateImageName(jpegFolder, i);
@@ -38,17 +41,17 @@ void LiveStream::saveAsJpeg(std::unique_ptr<cv::VideoCapture> stream, const std:
 	}
 }
 
-void LiveStream::saveAsMp4(std::unique_ptr<cv::VideoCapture> stream, const std::string& videoFolder) const
+void LiveStream::saveAsMp4(cv::VideoCapture& stream, const std::string& videoFolder) const
 {
 	auto writer = cv::VideoWriter(
 		generateVideoName(videoFolder, 1), 
 		cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 
-		stream->get(cv::CAP_PROP_FPS), 
-		cv::Size(stream->get(cv::CAP_PROP_FRAME_WIDTH), stream->get(cv::CAP_PROP_FRAME_HEIGHT)));
+		stream.get(cv::CAP_PROP_FPS), 
+		cv::Size(stream.get(cv::CAP_PROP_FRAME_WIDTH), stream.get(cv::CAP_PROP_FRAME_HEIGHT)));
 
 	cv::Mat frame;
 	for (size_t i = 0; i < 100; ++i){
-		if (!stream->read(frame)) {
+		if (!stream.read(frame)) {
 			throw std::exception("cannot read frame");
 		}
 		writer.write(frame);

@@ -7,7 +7,31 @@
 #include <string>
 #include <exception>
 
+#include <boost/beast/core/detail/base64.hpp>
+
+
 // only checking valid cases implemented
+
+void testBase64()
+{
+	using namespace boost::beast::detail::base64;
+
+	std::string word = "root123456"; //at least 10 charachters
+	size_t len = word.length();
+	std::string encoded = "cm9vdDEyMzQ1NgDMzMzMzA==";
+	
+	//encode((void*)(encoded.c_str()), (void*)(word.c_str()), encoded_size(len));
+
+	//std::cout << "encoding --> " << word << " --> " << encoded.c_str() << std::endl;
+
+	std::string decoded;
+
+	decode((void*)(decoded.c_str()), encoded.c_str(), decoded_size(encoded.length()));
+
+	std::cout << "decoding --> "<< encoded.c_str() << " --> " << decoded.c_str()<< std::endl;
+
+
+}
 
 
 void runAllTests() {};
@@ -17,7 +41,7 @@ void testSocket()
 	try {
 		NetworkService service;
 		service.waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
-		if (service.connectionEstablishedAndAuthenticated({ {"root", "hash777"} }))
+		if (service.connectionIsEstablishedAndAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
 			std::cout << "connection test passed" << std::endl;
 		
 	}

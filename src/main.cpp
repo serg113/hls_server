@@ -1,5 +1,4 @@
-//#define _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
-//#define  _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+
 
 #include "LiveStream.h"
 #include "NetworkService.h"
@@ -11,7 +10,6 @@
 #include <map>
 
 
-
 void run_app(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
@@ -19,7 +17,8 @@ int main(int argc, char* argv[])
 	//run_app(argc, argv);
 
 	testSocket();
-	//runAllTests();
+	//testLiveStream();
+	//testBase64();
 }
 
 void run_app(int argc, char* argv[])
@@ -45,7 +44,7 @@ void run_app(int argc, char* argv[])
 
 	service.waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
 
-	if (service.connectionEstablishedAndAuthenticated(existedUsersCredentials))
+	if (service.connectionIsEstablishedAndAuthenticated(existedUsersCredentials))
 	{
 		LiveStream liveStream(service.liveStreamUrl());
 
