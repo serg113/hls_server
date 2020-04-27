@@ -1,25 +1,67 @@
 #include "LiveStream.h"
+#include <opencv2/opencv.hpp>
 
-
-LiveStream* LiveStream::init(const std::string& lilveStreamUrl)
-{
-	// init opencv strem
-	return this;
-}
+LiveStream::LiveStream(const std::string& liveStreamUrl) : liveStreamUrl_(liveStreamUrl)
+{ };
 
 
 void LiveStream::saveFramesAsJpeg(const std::string& jpegFolder) const
 {
-	// save files and throw exception at failure
+	saveAsJpeg(openStream(), jpegFolder);
 }
 
 void LiveStream::saveFramesAsVideo(const std::string& videoFolder) const
 {
-	// save files and throw exception at failure
+	saveAsMp4(openStream(), videoFolder);
 }
 
-
-LiveStream* createLiveStream(const std::string& lilveStreamUrl)
+std::unique_ptr<cv::VideoCapture> LiveStream::openStream() const
 {
-	return (new LiveStream())->init(lilveStreamUrl);
+	auto stream = std::make_unique< cv::VideoCapture>(liveStreamUrl_);
+
+	if (!stream->isOpened()) {
+		throw std::exception("cannot open live stream");
+	}
+	return stream;
 }
+
+void LiveStream::saveAsJpeg(std::unique_ptr<cv::VideoCapture> stream, const std::string& jpegFolder) const
+{
+	cv::Mat frame;
+
+	for (size_t i = 0; i < 100; ++i) { // for cycle is for testing purposes
+		if (!stream->read(frame)) {
+			throw std::exception("cannot read frame");
+		}
+		std::string imageName = generateImageName(jpegFolder, i);
+		cv::imwrite(imageName, frame);
+	}
+}
+
+void LiveStream::saveAsMp4(std::unique_ptr<cv::VideoCapture> stream, const std::string& videoFolder) const
+{
+	auto writer = cv::VideoWriter(
+		generateVideoName(videoFolder, 1), 
+		cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 
+		stream->get(cv::CAP_PROP_FPS), 
+		cv::Size(stream->get(cv::CAP_PROP_FRAME_WIDTH), stream->get(cv::CAP_PROP_FRAME_HEIGHT)));
+
+	cv::Mat frame;
+	for (size_t i = 0; i < 100; ++i){
+		if (!stream->read(frame)) {
+			throw std::exception("cannot read frame");
+		}
+		writer.write(frame);
+	}
+}
+
+std::string LiveStream::generateImageName(const std::string& jpegFolder, size_t index) const
+{
+	return jpegFolder + "lsPic_" + std::to_string(index) + ".jpg";
+}
+
+std::string LiveStream::generateVideoName(const std::string& videoFolder, size_t index) const
+{
+	return videoFolder + "lsVid_" + std::to_string(index) + ".mp4";
+}
+

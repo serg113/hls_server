@@ -36,12 +36,12 @@ void run_app(int argc, char* argv[])
 	// this is a super-super socket // violates single responsibility principle
 	socket.listenAndAuthenticateAndSetRoutAndSetURL(users);
 
-	auto liveStream = createLiveStream(socket.liveStreamUrl());
+	LiveStream liveStream(socket.liveStreamUrl());
 
 	if (socket.routPathIs("/frames"))
-		liveStream->saveFramesAsJpeg(jpegFolder);
+		liveStream.saveFramesAsJpeg(jpegFolder);
 
 	if (socket.routPathIs("/record"))
-		liveStream->saveFramesAsVideo(videoFolder);
+		liveStream.saveFramesAsVideo(videoFolder);
 
 }
