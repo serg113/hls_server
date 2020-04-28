@@ -29,27 +29,25 @@ void testBase64()
 	decode((void*)(decoded.c_str()), encoded.c_str(), decoded_size(encoded.length()));
 
 	std::cout << "decoding --> "<< encoded.c_str() << " --> " << decoded.c_str()<< std::endl;
-
-
 }
 
 
-void testSocket()
+void testNetworkService()
 {
 	try {
 		NetworkService service;
 		service.waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
-		if (service.connectionIsEstablishedAndAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
+		if (service.connectionIsAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
 		{
-			std::cout << "connection test passed" << std::endl;
 			if (service.routPathEquals("/frames"))
 				std::cout << "routing passed from user: /frames" << std::endl;
 			if (service.routPathEquals("/record"))
 				std::cout << "routing passed from user: /record" << std::endl;
 
 			std::cout << "live link is : " << service.liveStreamUrl() << std::endl;
+
+			std::cout << "connection test passed" << std::endl;
 		}
-		
 	}
 	catch (const std::exception & ex)
 	{
@@ -58,7 +56,7 @@ void testSocket()
 	
 }
 
-void testLiveStream()
+void testLiveStreamProcessing()
 {
 	std::cout << "test 1/2 --> saving stream as jpeg  : ";
 	testSavingLiveStreamAsJpeg() ? std::cout << "passed\n" : std::cout << "failed\n";

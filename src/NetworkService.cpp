@@ -7,57 +7,50 @@ using namespace boost::asio;
 
 void NetworkService::waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains) 
 { 
-	// a lot of mess
 	io_service* service = new io_service(); // make shared
 	ip::tcp::acceptor acceptor_server(*service, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
 	socket_ptr server_socket = new ip::tcp::socket(*service); // make shared
 
 	acceptor_server.accept(*server_socket);
 
-	initConnectionIfTrusted(trustedDomains, server_socket);
+	initRequestStringIfTrusted(trustedDomains, server_socket);
 };
 
-bool NetworkService::connectionIsEstablishedAndAuthenticated(const std::map<std::string, std::string>& knownUsers)
-{
-	std::string requestString = readRequestString(); // curl localhost:7070/frames-l-http://192.168.99.1:8000/media/live-
 
-	if (knownUsers.at(extractUserLogin(requestString)) == extractUserPassword(requestString))
-	{
-		routingPath_ = extractRoutingPath(requestString); // "/frames" or "/record"
-		liveStreamUrl_ = extractStreamLink(requestString); // http://192.168.99.1:8000/media/live
-	}
-	return true;
+bool NetworkService::connectionIsAuthenticated(const std::map<std::string, std::string>& knownUsers)
+{
+	return knownUsers.at(extractUserLogin(requestString_)) == extractUserPassword(requestString_);
 }
 
 
 std::string NetworkService::liveStreamUrl() const
 {
-	return liveStreamUrl_;
+	return extractStreamLink(requestString_);
 }
 
 bool NetworkService::routPathEquals(const std::string& routPath) const
 {
-	return routingPath_ == routPath;
+	return routPath == extractRoutingPath(requestString_);;
 }
 
-std::string NetworkService::readRequestString() const
-{
-	streambuf buf;
-	read_until(*serverSocket_, buf, "\n");
-	return buffer_cast<const char*>(buf.data());;
-}
 
-void NetworkService::initConnectionIfTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket)
+void NetworkService::initRequestStringIfTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket)
 {
 	std::string connectionAddress = socket->remote_endpoint().address().to_string();
 
 	for (auto addr : trustedDomains) {
 		if (addr == connectionAddress) {
-			serverSocket_ = socket;
+			requestString_ = readRequestString(socket);
 		}
 	}
 }
 
+std::string NetworkService::readRequestString(socket_ptr socket) const
+{
+	streambuf buf;
+	read_until(*socket, buf, "\n");
+	return buffer_cast<const char*>(buf.data());;
+}
 
 std::string NetworkService::extractUserLogin(const std::string& requestString) const
 {
@@ -66,7 +59,7 @@ std::string NetworkService::extractUserLogin(const std::string& requestString) c
 
 std::string NetworkService::extractUserPassword(const std::string& requestString) const
 {
-	return "cm9vdDEyMzQ1NgDMzMzMzA=="; //"root123456"
+	return "cm9vdDEyMzQ1NgDMzMzMzA=="; //"root123456" 
 }
 
 std::string NetworkService::extractRoutingPath(const std::string& requestString) const

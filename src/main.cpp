@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 	 * or
 	 *    curl localhost:7070/record-l-http://192.168.99.1:8000/media/live-
 	 */
-	testSocket(); 
+	testNetworkService(); 
 
 	/*
 	 * for runninng live stream server we can run this test 
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 	 *		./media/video/
 	 *
 	 */
-	//testLiveStream();
+	//testLiveStreamProcessing();
 
 	// base64 encoding - decoding test, from boost library
 	//testBase64();
@@ -64,7 +64,7 @@ void run_app(int argc, char* argv[])
 
 	service.waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
 
-	if (service.connectionIsEstablishedAndAuthenticated(existedUsersCredentials))
+	if (service.connectionIsAuthenticated(existedUsersCredentials))
 	{
 		LiveStream liveStream(service.liveStreamUrl());
 

@@ -3,9 +3,9 @@
 
 void testBase64();
 
-void testSocket();
+void testNetworkService();
 
-void testLiveStream();
+void testLiveStreamProcessing();
 
 bool testSavingLiveStreamAsJpeg();
 
