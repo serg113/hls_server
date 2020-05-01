@@ -28,9 +28,9 @@ std::string NetworkService::liveStreamUrl() const
 	return extractStreamLink(requestString_);
 }
 
-bool NetworkService::routPathEquals(const std::string& routPath) const
+std::string NetworkService::routingPath() const
 {
-	return routPath == extractRoutingPath(requestString_);;
+	return extractRoutingPath(requestString_);
 }
 
 
@@ -49,7 +49,7 @@ std::string NetworkService::readRequestString(socket_ptr socket) const
 {
 	streambuf buf;
 	read_until(*socket, buf, "\n");
-	return buffer_cast<const char*>(buf.data());;
+	return buffer_cast<const char*>(buf.data());
 }
 
 std::string NetworkService::extractUserLogin(const std::string& requestString) const
@@ -59,17 +59,20 @@ std::string NetworkService::extractUserLogin(const std::string& requestString) c
 
 std::string NetworkService::extractUserPassword(const std::string& requestString) const
 {
-	return "cm9vdDEyMzQ1NgDMzMzMzA=="; //"root123456" 
+	return "cm9vdDEyMzQ1NgDMzMzMzA=="; //"root123456" 
 }
 
 std::string NetworkService::extractRoutingPath(const std::string& requestString) const
 {
+	//localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
 	return requestString.substr(requestString.find('/'), 7); // "/frames" or "/record"
 }
 
 std::string NetworkService::extractStreamLink(const std::string& requestString) const
 {
-	size_t linkLength = requestString.find("-", requestString.find("-l-") + 3) - (requestString.find("-l-") + 3);
-	auto link = requestString.substr(requestString.find("-l-") + 3, linkLength);
+	//localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
+	size_t startPos = requestString.find("-a:") + 3;
+	size_t length = requestString.find("-e:") - startPos;
+	auto link = requestString.substr(startPos, length);
 	return link;  // http://192.168.99.1:8000/media/live
 }

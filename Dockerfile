@@ -6,4 +6,4 @@ EXPOSE 7070
 
 ADD .  .
 
-CMD [ "echo", "hello !!!"]
+CMD [ "sh", "build_and_run"]

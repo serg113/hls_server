@@ -29,11 +29,10 @@ cv::VideoCapture LiveStream::openStream() const
 }
 
 void LiveStream::saveAsJpeg(cv::VideoCapture& stream, const std::string& jpegFolder) const
-
 {
 	cv::Mat frame;
 
-	for (size_t i = 0; i < 100; ++i) { // for cycle is for testing purposes
+	for (size_t i = 0; i < 100; ++i) { // used for testing purposes
 		if (!stream.read(frame)) {
 			throw std::runtime_error("cannot read frame");
 		}
@@ -51,7 +50,7 @@ void LiveStream::saveAsMp4(cv::VideoCapture& stream, const std::string& videoFol
 		cv::Size(stream.get(cv::CAP_PROP_FRAME_WIDTH), stream.get(cv::CAP_PROP_FRAME_HEIGHT)));
 
 	cv::Mat frame;
-	for (size_t i = 0; i < 100; ++i){
+	for (size_t i = 0; i < 100; ++i){ // used for testing purposes
 		if (!stream.read(frame)) {
 			throw std::runtime_error("cannot read frame");
 		}

@@ -18,24 +18,18 @@ int main(int argc, char* argv[])
 	 */
 	//run_app(argc, argv);
 
-	/* 
+	/* *
 	 * call from any terminal 
-	 * 
-	 *    curl localhost:7070/frames-l-http://192.168.99.1:8000/media/live-
+	 *    curl localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
 	 * or
-	 *    curl localhost:7070/record-l-http://192.168.99.1:8000/media/live-
+	 *    curl localhost:7070/record-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
 	 */
-	//testNetworkService(); 
+	testNetworkService(); 
 
 	/*
 	 * for runninng live stream server we can run this test 
-	 * functions calls is hardcoded with parameters 
-	 *		http://192.168.99.1:8000/media/live
-	 *		./media/jpeg/
-	 *		./media/video/
-	 *
 	 */
-	testLiveStreamProcessing();
+	//testLiveStreamProcessing();
 
 	// base64 encoding - decoding test, from boost library
 	//testBase64();
@@ -49,17 +43,17 @@ void run_app(int argc, char* argv[])
 	createFolderIfNotExist(jpegFolder);
 	createFolderIfNotExist(videoFolder);
 
-	std::map<std::string, std::string> existedUsersCredentials = { {"root", "hash777"} };
+	std::map<std::string, std::string> existedUsersCredentials = { {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} };
 
 	std::vector<std::string> trustedDomains = { "127.0.0.1", "192.168.99.1" };
 
 	if (argc > 2 && argv[1] == "--trusted")
 	{
 		for (int i = 2; i < argc; ++i)
-			trustedDomains.push_back(argv[i]);
+			trustedDomains.emplace_back(argv[i]);
 	}
 
-
+	// concrete classes can be changed, make client depend on interfaces
 	NetworkService service;
 
 	service.waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
@@ -68,10 +62,10 @@ void run_app(int argc, char* argv[])
 	{
 		LiveStream liveStream(service.liveStreamUrl());
 
-		if (service.routPathEquals("/frames"))
+		if (service.routingPath() == "/frames")
 			liveStream.saveFramesAsJpeg(jpegFolder);
 
-		if (service.routPathEquals("/record"))
+		if (service.routingPath() == "/record")
 			liveStream.saveFramesAsVideo(videoFolder);
 	}
 	

@@ -7,6 +7,7 @@ void testNetworkService();
 
 void testLiveStreamProcessing();
 
-bool testSavingLiveStreamAsJpeg();
+bool testSavingLiveStreamAsJpeg(std::string url);
 
-bool testSavingLiveStreamAsVideo();
+bool testSavingLiveStreamAsVideo(std::string url);
+
