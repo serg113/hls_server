@@ -1,5 +1,6 @@
 #include "LiveStream.h"
 #include <opencv2/opencv.hpp>
+#include <stdexcept>
 
 LiveStream::LiveStream(const std::string& liveStreamUrl) : liveStreamUrl_(liveStreamUrl)
 { };
@@ -22,7 +23,7 @@ cv::VideoCapture LiveStream::openStream() const
 	cv::VideoCapture stream(liveStreamUrl_);
 
 	if (!stream.isOpened()) {
-		throw std::exception("cannot open live stream");
+		throw std::runtime_error("cannot open live stream");
 	}
 	return stream;
 }
@@ -34,7 +35,7 @@ void LiveStream::saveAsJpeg(cv::VideoCapture& stream, const std::string& jpegFol
 
 	for (size_t i = 0; i < 100; ++i) { // for cycle is for testing purposes
 		if (!stream.read(frame)) {
-			throw std::exception("cannot read frame");
+			throw std::runtime_error("cannot read frame");
 		}
 		std::string imageName = generateImageName(jpegFolder, i);
 		cv::imwrite(imageName, frame);
@@ -52,7 +53,7 @@ void LiveStream::saveAsMp4(cv::VideoCapture& stream, const std::string& videoFol
 	cv::Mat frame;
 	for (size_t i = 0; i < 100; ++i){
 		if (!stream.read(frame)) {
-			throw std::exception("cannot read frame");
+			throw std::runtime_error("cannot read frame");
 		}
 		writer.write(frame);
 	}

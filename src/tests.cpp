@@ -37,7 +37,10 @@ void testNetworkService()
 	try {
 		NetworkService service;
 		service.waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
-		if (service.connectionIsAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
+		
+		std::cout << "hlsService running ... port 7070, localhost" << std::endl;
+
+		if (service.connectionIsAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
 		{
 			if (service.routPathEquals("/frames"))
 				std::cout << "routing passed from user: /frames" << std::endl;
