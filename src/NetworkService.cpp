@@ -21,7 +21,7 @@ UnAuthenticatedService* NetworkService::acceptConnection(const std::set<std::str
 	if (trustedDomains.find(clientDomain) == trustedDomains.end()) // return access denied to the connected user
 		throw std::runtime_error("unsafe client origin");
 
-	requestString_ = readRequestString(clientSocket);
+	options = new RequestOptions(readRequestString(clientSocket));
 
 	return this;
 };
@@ -30,7 +30,7 @@ UnAuthenticatedService* NetworkService::acceptConnection(const std::set<std::str
 const AuthenticatedService* NetworkService::authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const
 {
 	try {
-		if (usersToAccept.at(extractUserLogin()) != extractUserPassword())
+		if (usersToAccept.at(options->userLogin()) != options->userPassword())
 			throw std::runtime_error("user password does not match");
 	}
 	catch (const std::out_of_range& ex)
@@ -44,12 +44,12 @@ const AuthenticatedService* NetworkService::authenticateConnection(const std::ma
 
 std::string NetworkService::liveStreamUrl() const
 {
-	return extractStreamLink();
+	return options->streamLink();
 }
 
 std::string NetworkService::routingPath() const
 {
-	return extractRoutingPath();
+	return options->routingPath();
 }
 
 
@@ -70,31 +70,8 @@ std::string NetworkService::readRequestString(socket_t& socket) const
 	return buffer_cast<const char*>(buf.data());
 }
 
-std::string NetworkService::extractUserLogin() const
+NetworkService::~NetworkService()
 {
-	return extractTag("-u:", "-p:"); // root
+	delete options;
+	delete ioService_;
 }
-
-std::string NetworkService::extractUserPassword() const
-{
-	return extractTag("-p:", "-a:"); // cm9vdDEyMzQ1NgDMzMzMzA==
-}
-
-std::string NetworkService::extractRoutingPath() const
-{
-	return extractTag("/", "-u:"); // "frames" or "record"
-}
-
-std::string NetworkService::extractStreamLink() const
-{
-	return extractTag("-a:", "-e:");  // http://192.168.99.1:8000/media/live
-}
-
-std::string NetworkService::extractTag(const std::string& tag, const std::string& next) const
-{
-	//localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
-	size_t startPos = requestString_.find(tag) + tag.size();
-	size_t endPos = requestString_.find(next);
-	return requestString_.substr(startPos, endPos - startPos);
-}
-

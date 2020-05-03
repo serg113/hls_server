@@ -1,5 +1,6 @@
 #pragma once
 #include "NetworkInterface.h"
+#include "RequestOptions.h"
 
 #include <boost/asio.hpp>
 #include <memory>
@@ -14,7 +15,7 @@ using socket_t = boost::asio::ip::tcp::socket;
 // todo: separate three responsibilities of this class to avoid violation of SRP: 
 //	1. connection 
 //	2. authentication 
-//	3. requested options
+//  3. request options --> moved to RequestOptions class
 class NetworkService : UnAuthenticatedService, AuthenticatedService
 {
 public:
@@ -26,20 +27,13 @@ public:
 	std::string liveStreamUrl() const override;
 	std::string routingPath() const override;
 
+	~NetworkService();
+
 private:
 	socket_t acceptConnection(size_t port) const;
-
 	std::string readRequestString(socket_t& socket) const;
-	std::string extractUserLogin() const;
-	std::string extractUserPassword() const;
-	std::string extractRoutingPath() const;
-	std::string extractStreamLink() const;
-	std::string extractTag(const std::string& tag, const std::string& next) const;
-
-	std::string requestString_;
+	
+	RequestOptions* options;
 	boost::asio::io_service* ioService_;
 };
-
-
-
 
