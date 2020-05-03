@@ -30,10 +30,11 @@ private:
 	socket_t acceptConnection(size_t port) const;
 
 	std::string readRequestString(socket_t& socket) const;
-	std::string extractUserLogin(const std::string& requestString) const;
-	std::string extractUserPassword(const std::string& requestString) const;
-	std::string extractRoutingPath(const std::string& requestString) const;
-	std::string extractStreamLink(const std::string& requestString) const;
+	std::string extractUserLogin() const;
+	std::string extractUserPassword() const;
+	std::string extractRoutingPath() const;
+	std::string extractStreamLink() const;
+	std::string extractTag(const std::string& tag, const std::string& next) const;
 
 	std::string requestString_;
 	boost::asio::io_service* ioService_;

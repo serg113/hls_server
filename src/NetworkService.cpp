@@ -29,27 +29,27 @@ UnAuthenticatedService* NetworkService::acceptConnection(const std::set<std::str
 
 const AuthenticatedService* NetworkService::authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const
 {
-	if(usersToAccept.at(extractUserLogin(requestString_)) != extractUserPassword(requestString_))
+	if (usersToAccept.at(extractUserLogin()) != extractUserPassword())
 		throw std::runtime_error("connected user credentials not matched");
-
+	
 	return this;
 }
 
 
 std::string NetworkService::liveStreamUrl() const
 {
-	return extractStreamLink(requestString_);
+	return extractStreamLink();
 }
 
 std::string NetworkService::routingPath() const
 {
-	return extractRoutingPath(requestString_);
+	return extractRoutingPath();
 }
 
 
 socket_t NetworkService::acceptConnection(size_t port) const
 {
-	socket_t client(*ioService_);// = new ip::tcp::socket(*ioService_);
+	socket_t client(*ioService_);
 	ip::tcp::acceptor acceptor(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), port)); 
 	acceptor.accept(client);
 
@@ -64,27 +64,31 @@ std::string NetworkService::readRequestString(socket_t& socket) const
 	return buffer_cast<const char*>(buf.data());
 }
 
-std::string NetworkService::extractUserLogin(const std::string& requestString) const
+std::string NetworkService::extractUserLogin() const
 {
-	return "root"; // only available user
+	return extractTag("-u:", "-p:"); // root
 }
 
-std::string NetworkService::extractUserPassword(const std::string& requestString) const
+std::string NetworkService::extractUserPassword() const
 {
-	return "cm9vdDEyMzQ1NgDMzMzMzA=="; //"root123456" 
+	return extractTag("-p:", "-a:"); // cm9vdDEyMzQ1NgDMzMzMzA==
 }
 
-std::string NetworkService::extractRoutingPath(const std::string& requestString) const
+std::string NetworkService::extractRoutingPath() const
+{
+	return extractTag("/", "-u:"); // "frames" or "record"
+}
+
+std::string NetworkService::extractStreamLink() const
+{
+	return extractTag("-a:", "-e:");  // http://192.168.99.1:8000/media/live
+}
+
+std::string NetworkService::extractTag(const std::string& tag, const std::string& next) const
 {
 	//localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
-	return requestString.substr(requestString.find('/'), 7); // "/frames" or "/record"
+	size_t startPos = requestString_.find(tag) + tag.size();
+	size_t endPos = requestString_.find(next);
+	return requestString_.substr(startPos, endPos - startPos);
 }
 
-std::string NetworkService::extractStreamLink(const std::string& requestString) const
-{
-	//localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
-	size_t startPos = requestString.find("-a:") + 3;
-	size_t length = requestString.find("-e:") - startPos;
-	auto link = requestString.substr(startPos, length);
-	return link;  // http://192.168.99.1:8000/media/live
-}

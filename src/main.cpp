@@ -51,10 +51,10 @@ void run_app(int argc, char* argv[])
 
 		LiveStream liveStream(service->liveStreamUrl());
 
-		if (service->routingPath() == "/frames")
+		if (service->routingPath() == "frames")
 			liveStream.saveFramesAsJpeg(jpegFolder);
 
-		if (service->routingPath() == "/record")
+		if (service->routingPath() == "record")
 			liveStream.saveFramesAsVideo(videoFolder);
 	}
 	catch (const std::exception& ex)

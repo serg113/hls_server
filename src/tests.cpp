@@ -28,11 +28,11 @@ void testNetworkService()
 			->authenticateConnection({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} });
 
 		std::cout << "\n[ok] connection established and authenticated" << std::endl;
-		if (service->routingPath() == "/frames")
+		if (service->routingPath() == "frames")
 		{
 			testSavingLiveStreamAsJpeg(service->liveStreamUrl());
 		}
-		else if (service->routingPath() == "/record")
+		else if (service->routingPath() == "record")
 		{
 			testSavingLiveStreamAsVideo(service->liveStreamUrl());
 		}
