@@ -29,8 +29,14 @@ UnAuthenticatedService* NetworkService::acceptConnection(const std::set<std::str
 
 const AuthenticatedService* NetworkService::authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const
 {
-	if (usersToAccept.at(extractUserLogin()) != extractUserPassword())
-		throw std::runtime_error("connected user credentials not matched");
+	try {
+		if (usersToAccept.at(extractUserLogin()) != extractUserPassword())
+			throw std::runtime_error("user password does not match");
+	}
+	catch (const std::out_of_range& ex)
+	{
+		throw std::runtime_error("connected user does not listed");
+	}
 	
 	return this;
 }
