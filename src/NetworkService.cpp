@@ -10,17 +10,15 @@ using namespace boost::asio;
 UnAuthenticatedService* NetworkService::init()
 {
 	ioService_ = new io_service();
-
 	return this;
 }
 
-AuthenticatedService* NetworkService::waitConnectionFromTrustedDomains(const std::set<std::string>& trustedDomains)
+UnAuthenticatedService* NetworkService::acceptConnection(const std::set<std::string>& trustedDomains)
 { 
 	socket_t clientSocket = acceptConnection(7070); // listen on 7070
 	std::string clientDomain = clientSocket.remote_endpoint().address().to_string();
 
-	// Here we ensure double check, first one need to be configured by os. Do we really need it if os handles this case???
-	if (trustedDomains.find(clientDomain) == trustedDomains.end())
+	if (trustedDomains.find(clientDomain) == trustedDomains.end()) // return access denied to the connected user
 		throw std::runtime_error("unsafe client origin");
 
 	requestString_ = readRequestString(clientSocket);
@@ -29,9 +27,12 @@ AuthenticatedService* NetworkService::waitConnectionFromTrustedDomains(const std
 };
 
 
-bool NetworkService::connectionIsAuthenticated(const std::map<std::string, std::string>& knownUsers) const
+const AuthenticatedService* NetworkService::authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const
 {
-	return knownUsers.at(extractUserLogin(requestString_)) == extractUserPassword(requestString_);
+	if(usersToAccept.at(extractUserLogin(requestString_)) != extractUserPassword(requestString_))
+		throw std::runtime_error("connected user credentials not matched");
+
+	return this;
 }
 
 

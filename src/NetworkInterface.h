@@ -7,7 +7,6 @@
 class AuthenticatedService
 {
 public:
-	virtual bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept) const = 0;
 	virtual std::string liveStreamUrl() const = 0;
 	virtual std::string routingPath() const = 0;
 };
@@ -15,11 +14,9 @@ public:
 class UnAuthenticatedService
 {
 public:
-	virtual AuthenticatedService* waitConnectionFromTrustedDomains(const std::set<std::string>& trustedDomains) = 0;
+	virtual UnAuthenticatedService* acceptConnection(const std::set<std::string>& trustedDomains) = 0;
+	virtual const AuthenticatedService* authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const = 0;
 };
 
 
-UnAuthenticatedService* createNetworkService(/*
-	const std::vector<std::string>& trustedDomains,
-	const std::map<std::string, std::string>& usersToAccept*/
-);
+UnAuthenticatedService* createNetworkService();

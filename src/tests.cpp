@@ -10,28 +10,6 @@
 #include <boost/beast/core/detail/base64.hpp>
 
 
-// only checking of valid cases
-
-void testBase64()
-{
-	using namespace boost::beast::detail::base64;
-
-	std::string word = "root123456"; //at least 10 charachters
-	size_t len = word.length();
-	std::string encoded = "cm9vdDEyMzQ1NgDMzMzMzA==";
-	
-	//encode((void*)(encoded.c_str()), (void*)(word.c_str()), encoded_size(len));
-
-	//std::cout << "encoding --> " << word << " --> " << encoded.c_str() << std::endl;
-
-	std::string decoded;
-
-	decode((void*)(decoded.c_str()), encoded.c_str(), decoded_size(encoded.length()));
-
-	std::cout << "decoding --> "<< encoded.c_str() << " --> " << decoded.c_str()<< std::endl;
-}
-
-
 void testNetworkService() 
 {
 	try {
@@ -43,36 +21,32 @@ void testNetworkService()
 			"or\n"
 			"    curl localhost:7070/record-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:\n"
 			<< std::endl;
-		std::cout << "[start] waiting for connection" << std::endl;
+		std::cout << "[start] waiting for connection..." << std::endl;
 
 		auto service = createNetworkService()
-			->waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
+			->acceptConnection({ "127.0.0.1", "192.168.99.1" })
+			->authenticateConnection({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} });
 
-		std::cout << "\n[ok] connection established" << std::endl;
-		if (service->connectionIsAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
+		std::cout << "\n[ok] connection established and authenticated" << std::endl;
+		if (service->routingPath() == "/frames")
 		{
-			std::cout << "\n[ok] connection authenticated" << std::endl;
-			if (service->routingPath() == "/frames")
-			{
-				std::cout << "\n[ok] routing path: /frames" << std::endl;
-				testSavingLiveStreamAsJpeg(service->liveStreamUrl());
-			}
-			else if (service->routingPath() == "/record")
-			{
-				std::cout << "\n[ok] routing path: /record" << std::endl;
-				testSavingLiveStreamAsVideo(service->liveStreamUrl());
-			}
-			else
-				std::cout << "\n[error] routing path not recognaized" << std::endl;
-
-			std::cout << "\n[info] user provided live link: " << service->liveStreamUrl() << std::endl;
-
-			std::cout << "\n[end] connection test passed" << std::endl;
+			testSavingLiveStreamAsJpeg(service->liveStreamUrl());
 		}
+		else if (service->routingPath() == "/record")
+		{
+			testSavingLiveStreamAsVideo(service->liveStreamUrl());
+		}
+		else
+		{
+			std::cout << "\n[error] routing path not recognaized" << std::endl;
+		}
+
+		std::cout << "\n[end] connection test passed" << std::endl;
+		
 	}
 	catch (const std::exception & ex)
 	{
-		std::cout << "\n[end] connection test failed" << std::endl;
+		std::cout << "\n[end] connection test failed, msg : " << ex.what() << std::endl;
 	}
 }
 
@@ -130,4 +104,23 @@ bool testSavingLiveStreamAsVideo(std::string url)
 	}
 
 	return success;
+}
+
+void testBase64()
+{
+	using namespace boost::beast::detail::base64;
+
+	std::string word = "root123456"; //at least 10 charachters
+	size_t len = word.length();
+	std::string encoded = "cm9vdDEyMzQ1NgDMzMzMzA==";
+
+	//encode((void*)(encoded.c_str()), (void*)(word.c_str()), encoded_size(len));
+
+	//std::cout << "encoding --> " << word << " --> " << encoded.c_str() << std::endl;
+
+	std::string decoded;
+
+	decode((void*)(decoded.c_str()), encoded.c_str(), decoded_size(encoded.length()));
+
+	std::cout << "decoding --> " << encoded.c_str() << " --> " << decoded.c_str() << std::endl;
 }

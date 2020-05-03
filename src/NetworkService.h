@@ -20,8 +20,8 @@ class NetworkService : UnAuthenticatedService, AuthenticatedService
 public:
 	UnAuthenticatedService* init();
 
-	AuthenticatedService* waitConnectionFromTrustedDomains(const std::set<std::string>& trustedDomains) override;
-	bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept) const override;
+	virtual UnAuthenticatedService* acceptConnection(const std::set<std::string>& trustedDomains) override;
+	virtual const AuthenticatedService* authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const override;
 
 	std::string liveStreamUrl() const override;
 	std::string routingPath() const override;

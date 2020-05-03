@@ -6,6 +6,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <exception>
 
 
 void run_app(int argc, char* argv[]);
@@ -42,12 +43,12 @@ void run_app(int argc, char* argv[])
 			trustedDomains.emplace(argv[i]);
 	}
 
-	// concrete classes can be changed, client should depend on interfaces
-	auto service = createNetworkService()
-		->waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
+	try {
+		auto service = createNetworkService()
+			->acceptConnection(trustedDomains)
+			->authenticateConnection(existedUsersCredentials);
 
-	if (service->connectionIsAuthenticated(existedUsersCredentials))
-	{
+
 		LiveStream liveStream(service->liveStreamUrl());
 
 		if (service->routingPath() == "/frames")
@@ -56,6 +57,9 @@ void run_app(int argc, char* argv[])
 		if (service->routingPath() == "/record")
 			liveStream.saveFramesAsVideo(videoFolder);
 	}
-	
+	catch (const std::exception& ex)
+	{
+		std::cout << "[error] " << ex.what() << std::endl;
+	}
 
 }
