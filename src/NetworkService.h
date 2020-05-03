@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <memory>
 #include <string>
-#include <vector>
+#include <set>
 #include <map>
 
 
@@ -20,15 +20,14 @@ class NetworkService : UnAuthenticatedService, AuthenticatedService
 public:
 	UnAuthenticatedService* init();
 
-	AuthenticatedService* waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains) override;
+	AuthenticatedService* waitConnectionFromTrustedDomains(const std::set<std::string>& trustedDomains) override;
 	bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept) const override;
 
 	std::string liveStreamUrl() const override;
 	std::string routingPath() const override;
 
 private:
-	socket_t acceptNewConnection(size_t port) const;
-	bool clientIsTrusted(const std::vector<std::string>& trustedDomains, const socket_t& socket) const;
+	socket_t acceptConnection(size_t port) const;
 
 	std::string readRequestString(socket_t& socket) const;
 	std::string extractUserLogin(const std::string& requestString) const;

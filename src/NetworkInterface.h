@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <set>
 #include <map>
 
 
@@ -15,7 +15,7 @@ public:
 class UnAuthenticatedService
 {
 public:
-	virtual AuthenticatedService* waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains) = 0;
+	virtual AuthenticatedService* waitConnectionFromTrustedDomains(const std::set<std::string>& trustedDomains) = 0;
 };
 
 
