@@ -9,16 +9,17 @@ using namespace boost::asio;
 
 UnAuthenticatedService* NetworkService::init()
 {
-	ioService_ = new io_service();	// class needs io_service instance during it's lifetime
+	ioService_ = new io_service();
 
 	return this;
 }
 
 AuthenticatedService* NetworkService::waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains)
 { 
-	socket_ptr clientSocket = acceptNewConnection(7070);
+	socket_t clientSocket = acceptNewConnection(7070); // listen on 7070
 
-	if (!clientIsTrusted(trustedDomains, clientSocket))
+	// Here we ensure duble check, first one need to be configured by os. Do we really need it if os handles this case???
+	if (!clientIsTrusted(trustedDomains, clientSocket)) 
 		throw std::runtime_error("unsafe client origin");
 
 	requestString_ = readRequestString(clientSocket);
@@ -27,7 +28,7 @@ AuthenticatedService* NetworkService::waitConnectionFromTrustedDomains(const std
 };
 
 
-bool NetworkService::connectionIsAuthenticated(const std::map<std::string, std::string>& knownUsers)
+bool NetworkService::connectionIsAuthenticated(const std::map<std::string, std::string>& knownUsers) const
 {
 	return knownUsers.at(extractUserLogin(requestString_)) == extractUserPassword(requestString_);
 }
@@ -44,18 +45,18 @@ std::string NetworkService::routingPath() const
 }
 
 
-socket_ptr NetworkService::acceptNewConnection(size_t port)
+socket_t NetworkService::acceptNewConnection(size_t port) const
 {
-	socket_ptr client = new ip::tcp::socket(*ioService_);
-	ip::tcp::acceptor acceptor(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
-	acceptor.accept(*client);
+	socket_t client(*ioService_);// = new ip::tcp::socket(*ioService_);
+	ip::tcp::acceptor acceptor(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), port)); 
+	acceptor.accept(client);
 
 	return client;
 }
 
-bool NetworkService::clientIsTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket)
+bool NetworkService::clientIsTrusted(const std::vector<std::string>& trustedDomains, const socket_t& socket) const
 {
-	std::string connectionAddress = socket->remote_endpoint().address().to_string();
+	std::string connectionAddress = socket.remote_endpoint().address().to_string();
 
 	for (auto addr : trustedDomains) {
 		if (addr == connectionAddress) {
@@ -65,10 +66,10 @@ bool NetworkService::clientIsTrusted(const std::vector<std::string>& trustedDoma
 	return false;
 }
 
-std::string NetworkService::readRequestString(socket_ptr socket) const
+std::string NetworkService::readRequestString(socket_t& socket) const
 {
 	streambuf buf;
-	read_until(*socket, buf, "\n");
+	read_until(socket, buf, "\n");
 	return buffer_cast<const char*>(buf.data());
 }
 

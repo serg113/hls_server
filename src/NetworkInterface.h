@@ -7,7 +7,7 @@
 class AuthenticatedService
 {
 public:
-	virtual bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept) = 0;
+	virtual bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept) const = 0;
 	virtual std::string liveStreamUrl() const = 0;
 	virtual std::string routingPath() const = 0;
 };
