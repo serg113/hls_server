@@ -1,5 +1,5 @@
 #include "LiveStream.h"
-#include "NetworkService.h"
+#include "NetworkInterface.h"
 #include "utils.h"
 #include "tests.h"
 
@@ -25,14 +25,6 @@ int main(int argc, char* argv[])
 	 *    curl localhost:7070/record-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
 	 */
 	testNetworkService(); 
-
-	/*
-	 * for runninng live stream server we can run this test 
-	 */
-	//testLiveStreamProcessing();
-
-	// base64 encoding - decoding test, from boost library
-	//testBase64();
 }
 
 void run_app(int argc, char* argv[])
@@ -53,19 +45,18 @@ void run_app(int argc, char* argv[])
 			trustedDomains.emplace_back(argv[i]);
 	}
 
-	// concrete classes can be changed, make client depend on interfaces
-	NetworkService service;
+	// concrete classes can be changed, client should depend on interfaces
+	auto service = createNetworkService()
+		->waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
 
-	service.waitConnectionFromTrustedDomains(trustedDomains); // running on port 7070
-
-	if (service.connectionIsAuthenticated(existedUsersCredentials))
+	if (service->connectionIsAuthenticated(existedUsersCredentials))
 	{
-		LiveStream liveStream(service.liveStreamUrl());
+		LiveStream liveStream(service->liveStreamUrl());
 
-		if (service.routingPath() == "/frames")
+		if (service->routingPath() == "/frames")
 			liveStream.saveFramesAsJpeg(jpegFolder);
 
-		if (service.routingPath() == "/record")
+		if (service->routingPath() == "/record")
 			liveStream.saveFramesAsVideo(videoFolder);
 	}
 	

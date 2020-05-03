@@ -5,15 +5,24 @@
 
 using namespace boost::asio;
 
-void NetworkService::waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains) 
+
+UnAuthenticatedService* NetworkService::init()
+{
+	ioService_ = new io_service();	// class needs io_service existence during it's lifetime
+
+	return this;
+}
+
+AuthenticatedService* NetworkService::waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains)
 { 
-	io_service* service = new io_service(); // make shared
-	ip::tcp::acceptor acceptor_server(*service, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
-	socket_ptr server_socket = new ip::tcp::socket(*service); // make shared
+	ip::tcp::acceptor acceptor_server(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
+	socket_ptr server_socket = new ip::tcp::socket(*ioService_); // make shared or can be used copy instead ??
 
 	acceptor_server.accept(*server_socket);
 
 	initRequestStringIfTrusted(trustedDomains, server_socket);
+
+	return this;
 };
 
 

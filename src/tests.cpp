@@ -1,4 +1,4 @@
-#include "NetworkService.h"
+#include "NetworkInterface.h"
 #include "LiveStream.h"
 #include "utils.h"
 #include "tests.h"
@@ -10,7 +10,7 @@
 #include <boost/beast/core/detail/base64.hpp>
 
 
-// only checking valid cases implemented
+// only checking of valid cases
 
 void testBase64()
 {
@@ -45,27 +45,27 @@ void testNetworkService()
 			<< std::endl;
 		std::cout << "[start] waiting for connection" << std::endl;
 
-		NetworkService service;
-		service.waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
+		auto service = createNetworkService()
+			->waitConnectionFromTrustedDomains({ "127.0.0.1", "192.168.99.1" });
 
 		std::cout << "\n[ok] connection established" << std::endl;
-		if (service.connectionIsAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
+		if (service->connectionIsAuthenticated({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} })) // root123456
 		{
 			std::cout << "\n[ok] connection authenticated" << std::endl;
-			if (service.routingPath() == "/frames")
+			if (service->routingPath() == "/frames")
 			{
 				std::cout << "\n[ok] routing path: /frames" << std::endl;
-				testSavingLiveStreamAsJpeg(service.liveStreamUrl());
+				testSavingLiveStreamAsJpeg(service->liveStreamUrl());
 			}
-			else if (service.routingPath() == "/record")
+			else if (service->routingPath() == "/record")
 			{
 				std::cout << "\n[ok] routing path: /record" << std::endl;
-				testSavingLiveStreamAsVideo(service.liveStreamUrl());
+				testSavingLiveStreamAsVideo(service->liveStreamUrl());
 			}
 			else
 				std::cout << "\n[error] routing path not recognaized" << std::endl;
 
-			std::cout << "\n[info] user provided live link: " << service.liveStreamUrl() << std::endl;
+			std::cout << "\n[info] user provided live link: " << service->liveStreamUrl() << std::endl;
 
 			std::cout << "\n[end] connection test passed" << std::endl;
 		}

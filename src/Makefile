@@ -5,6 +5,7 @@ LDFLAGS += -lz $(shell pkg-config --libs --static opencv)
 
 SOURCES = main.cpp\
 	  LiveStream.cpp\
+	  NetwokInterface.cpp\
 	  NetworkService.cpp\
 	  tests.cpp\
 	  utils.cpp

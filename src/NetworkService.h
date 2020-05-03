@@ -1,4 +1,6 @@
 #pragma once
+#include "NetworkInterface.h"
+
 #include <boost/asio.hpp>
 #include <memory>
 #include <string>
@@ -7,25 +9,21 @@
 
 typedef boost::asio::ip::tcp::socket* socket_ptr;
 
-// here are three classes 
-//		and three responsibilities: 
-//									1. connection 
-//									2. authentication 
-//									3. requested options
-//
-// reasons currently I need to change the class are 
-// 1. connection with another method, not tcp socket
-// 2. if authentication method changes
-// 3. if parsing request string format will be changed
 
-class NetworkService 
+// todo: separate three responsibilities of this class to avoid violation of SRP: 
+//	1. connection 
+//	2. authentication 
+//	3. requested options
+class NetworkService : UnAuthenticatedService, AuthenticatedService
 {
 public:
-	void waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains);
-	bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept);
+	UnAuthenticatedService* init();
 
-	std::string liveStreamUrl() const;
-	std::string routingPath() const;
+	AuthenticatedService* waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains) override;
+	bool connectionIsAuthenticated(const std::map<std::string, std::string>& usersToAccept) override;
+
+	std::string liveStreamUrl() const override;
+	std::string routingPath() const override;
 
 private:
 	void initRequestStringIfTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket);
@@ -37,5 +35,9 @@ private:
 	std::string extractStreamLink(const std::string& requestString) const;
 
 	std::string requestString_;
+	boost::asio::io_service* ioService_;
 };
+
+
+
 
