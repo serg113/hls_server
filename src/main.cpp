@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	//run_app(argc, argv);
 
 	/* *
-	 * call from any terminal 
+	 * test by terminal 
 	 *    curl localhost:7070/frames-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
 	 * or
 	 *    curl localhost:7070/record-u:root-p:cm9vdDEyMzQ1NgDMzMzMzA==-a:http://192.168.99.1:8000/media/live-e:
@@ -35,7 +35,7 @@ void run_app(int argc, char* argv[])
 	createFolderIfNotExist(jpegFolder);
 	createFolderIfNotExist(videoFolder);
 
-	std::map<std::string, std::string> existedUsersCredentials = { {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} };
+	std::map<std::string, std::string> existedUsersCredentials = { {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} };
 
 	std::vector<std::string> trustedDomains = { "127.0.0.1", "192.168.99.1" };
 

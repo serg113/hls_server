@@ -26,7 +26,8 @@ public:
 	std::string routingPath() const override;
 
 private:
-	void initRequestStringIfTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket);
+	socket_ptr acceptNewConnection(size_t port);
+	bool clientIsTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket);
 
 	std::string readRequestString(socket_ptr socket) const;
 	std::string extractUserLogin(const std::string& requestString) const;

@@ -2,25 +2,26 @@
 
 #include <boost/asio.hpp>
 #include <iostream>
+#include <stdexcept>
 
 using namespace boost::asio;
 
 
 UnAuthenticatedService* NetworkService::init()
 {
-	ioService_ = new io_service();	// class needs io_service existence during it's lifetime
+	ioService_ = new io_service();	// class needs io_service instance during it's lifetime
 
 	return this;
 }
 
 AuthenticatedService* NetworkService::waitConnectionFromTrustedDomains(const std::vector<std::string>& trustedDomains)
 { 
-	ip::tcp::acceptor acceptor_server(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
-	socket_ptr server_socket = new ip::tcp::socket(*ioService_); // make shared or can be used copy instead ??
+	socket_ptr clientSocket = acceptNewConnection(7070);
 
-	acceptor_server.accept(*server_socket);
+	if (!clientIsTrusted(trustedDomains, clientSocket))
+		throw std::runtime_error("unsafe client origin");
 
-	initRequestStringIfTrusted(trustedDomains, server_socket);
+	requestString_ = readRequestString(clientSocket);
 
 	return this;
 };
@@ -43,15 +44,25 @@ std::string NetworkService::routingPath() const
 }
 
 
-void NetworkService::initRequestStringIfTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket)
+socket_ptr NetworkService::acceptNewConnection(size_t port)
+{
+	socket_ptr client = new ip::tcp::socket(*ioService_);
+	ip::tcp::acceptor acceptor(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), 7070)); // listen on 7070
+	acceptor.accept(*client);
+
+	return client;
+}
+
+bool NetworkService::clientIsTrusted(const std::vector<std::string>& trustedDomains, socket_ptr socket)
 {
 	std::string connectionAddress = socket->remote_endpoint().address().to_string();
 
 	for (auto addr : trustedDomains) {
 		if (addr == connectionAddress) {
-			requestString_ = readRequestString(socket);
+			return true;
 		}
 	}
+	return false;
 }
 
 std::string NetworkService::readRequestString(socket_ptr socket) const
