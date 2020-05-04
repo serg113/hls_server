@@ -3,6 +3,21 @@
 #include <set>
 #include <map>
 
+/* 
+  interface for client
+*/
+
+/*  Service initialization consists of two function calls
+	ex.
+		auto service = createNetworkService(domains)->acceptUsers(credentials);
+
+	after initialization object will provide an interface for internal data
+	ex.
+		std::string url = service->liveStreamUrl();
+		std::string routPath = service->routingPath();
+
+	note: initialized object is immutable (we cannot change it's internal state after successful initialization)
+*/ 
 
 class AuthenticatedService
 {

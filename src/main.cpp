@@ -45,6 +45,8 @@ void run_app(int argc, char* argv[])
 
 	try
 	{
+		// NetworkService is hidden behind the interface
+		// as S.M. says "make interfaces easy to use correctly and hard to use incorrectly"
 		auto service = createNetworkService(trustedDomains)
 			->acceptUsers(existedUsersCredentials);
 			

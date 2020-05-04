@@ -3,7 +3,6 @@
 #include "RequestOptions.h"
 
 #include <boost/asio.hpp>
-#include <memory>
 #include <string>
 #include <set>
 #include <map>
@@ -20,8 +19,8 @@ class NetworkService : UnAuthenticatedService, AuthenticatedService
 {
 public:
 	NetworkService(const std::set<std::string>& trustedDomains);
-	UnAuthenticatedService* init();
 
+	UnAuthenticatedService* init();
 	const AuthenticatedService* acceptUsers(const std::map<std::string, std::string>& usersToAccept) override;
 
 	std::string liveStreamUrl() const override;
@@ -33,7 +32,7 @@ private:
 	socket_t acceptConnection(size_t port) const;
 	std::string readRequestString(socket_t& socket) const;
 	void checkIfClientDomainIsTrusted(const socket_t& client) const;
-	void checkIfCredentialsAreValid(const std::map<std::string, std::string>& usersToAccept) const;
+	void checkIfCredentialsAreValid(const std::map<std::string, std::string>& usersToAccept, const RequestOptions& options) const;
 	
 	RequestOptions* options_;
 	boost::asio::io_service* ioService_;
