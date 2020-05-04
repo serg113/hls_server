@@ -43,12 +43,11 @@ void run_app(int argc, char* argv[])
 			trustedDomains.emplace(argv[i]);
 	}
 
-	try {
-		auto service = createNetworkService()
-			->acceptConnection(trustedDomains)
-			->authenticateConnection(existedUsersCredentials);
-
-
+	try
+	{
+		auto service = createNetworkService(trustedDomains)
+			->acceptUsers(existedUsersCredentials);
+			
 		LiveStream liveStream(service->liveStreamUrl());
 
 		if (service->routingPath() == "frames")

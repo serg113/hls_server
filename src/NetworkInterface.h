@@ -14,9 +14,8 @@ public:
 class UnAuthenticatedService
 {
 public:
-	virtual UnAuthenticatedService* acceptConnection(const std::set<std::string>& trustedDomains) = 0;
-	virtual const AuthenticatedService* authenticateConnection(const std::map<std::string, std::string>& usersToAccept) const = 0;
+	virtual const AuthenticatedService* acceptUsers(const std::map<std::string, std::string>& usersToAccept) = 0;
 };
 
 
-UnAuthenticatedService* createNetworkService();
+UnAuthenticatedService* createNetworkService(const std::set<std::string>& trustedDomains);

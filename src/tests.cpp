@@ -23,9 +23,8 @@ void testNetworkService()
 			<< std::endl;
 		std::cout << "[start] waiting for connection..." << std::endl;
 
-		auto service = createNetworkService()
-			->acceptConnection({ "127.0.0.1", "192.168.99.1" })
-			->authenticateConnection({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} });
+		auto service = createNetworkService({ "127.0.0.1", "192.168.99.1" })
+			->acceptUsers({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} });
 
 		std::cout << "\n[ok] connection established and authenticated" << std::endl;
 		if (service->routingPath() == "frames")

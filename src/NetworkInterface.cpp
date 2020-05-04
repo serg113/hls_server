@@ -2,7 +2,7 @@
 #include "NetworkService.h"
 
 
-UnAuthenticatedService* createNetworkService()
+UnAuthenticatedService* createNetworkService(const std::set<std::string>& trustedDomains)
 {
-	return (new NetworkService())->init();
+	return (new NetworkService(trustedDomains))->init();
 }
