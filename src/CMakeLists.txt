@@ -24,7 +24,7 @@ message(STATUS "    libraries: ${OpenCV_LIBS}")
 message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 # Declare the executable target built from your sources
-add_executable(ss main.cpp LiveStream.cpp NetworkService.cpp tests.cpp utils.cpp)
+add_executable(ss main.cpp LiveStream.cpp NetworkService.cpp NetworkInterface.cpp RequestOptions.cpp tests.cpp utils.cpp)
 
 # Link your application with OpenCV libraries
 target_link_libraries(ss PRIVATE ${OpenCV_LIBS})

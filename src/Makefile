@@ -7,6 +7,7 @@ SOURCES = main.cpp\
 	  LiveStream.cpp\
 	  NetworkInterface.cpp\
 	  NetworkService.cpp\
+	  RequestOptions.cpp\
 	  tests.cpp\
 	  utils.cpp
 
