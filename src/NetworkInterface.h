@@ -9,12 +9,13 @@
 
 /*  Service initialization consists of two function calls
 	ex.
-		auto service = createNetworkService(domains)->acceptUsers(credentials);
+		auto service = createNetworkService(domains)
+				->waitAndAuthenticateIncomingConnection(credentials);
 
 	after initialization object will provide an interface for internal data
 	ex.
 		std::string url = service->liveStreamUrl();
-		std::string routPath = service->routingPath();
+		service->routingPathEquals(path); // ok: do not expose internal data
 
 	note: initialized object is immutable (we cannot change it's internal state after successful initialization)
 */ 
@@ -23,13 +24,13 @@ class AuthenticatedService
 {
 public:
 	virtual std::string liveStreamUrl() const = 0;
-	virtual std::string routingPath() const = 0;
+	virtual bool routingPathEquals(const std::string& path) const = 0;
 };
 
 class UnAuthenticatedService
 {
 public:
-	virtual const AuthenticatedService* acceptUsers(const std::map<std::string, std::string>& usersToAccept) = 0;
+	virtual const AuthenticatedService* waitAndAuthenticateIncomingConnection(const std::map<std::string, std::string>& usersToAccept) = 0;
 };
 
 

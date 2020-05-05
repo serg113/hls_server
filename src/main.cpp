@@ -48,14 +48,14 @@ void run_app(int argc, char* argv[])
 		// NetworkService is hidden behind the interface
 		// as S.M. says "make interfaces easy to use correctly and hard to use incorrectly"
 		auto service = createNetworkService(trustedDomains)
-			->acceptUsers(existedUsersCredentials);
+			->waitAndAuthenticateIncomingConnection(existedUsersCredentials);
 			
 		LiveStream liveStream(service->liveStreamUrl());
 
-		if (service->routingPath() == "frames")
+		if (service->routingPathEquals("frames"))
 			liveStream.saveFramesAsJpeg(jpegFolder);
 
-		if (service->routingPath() == "record")
+		if (service->routingPathEquals("record"))
 			liveStream.saveFramesAsVideo(videoFolder);
 	}
 	catch (const std::exception& ex)

@@ -11,11 +11,11 @@ NetworkService::NetworkService(const std::set<std::string>& trustedDomains) : tr
 
 UnAuthenticatedService* NetworkService::init()
 {
-	ioService_ = new io_service();
+	ioService_ = std::make_shared<io_service>();
 	return this;
 }
 
-const AuthenticatedService* NetworkService::acceptUsers(const std::map<std::string, std::string>& usersToAccept)
+const AuthenticatedService* NetworkService::waitAndAuthenticateIncomingConnection(const std::map<std::string, std::string>& usersToAccept)
 {
 	socket_t client = acceptConnection(PORT);
 
@@ -25,7 +25,7 @@ const AuthenticatedService* NetworkService::acceptUsers(const std::map<std::stri
 
 	checkIfCredentialsAreValid(usersToAccept, options);
 
-	options_ = new RequestOptions(options);
+	options_ = std::make_shared<RequestOptions>(options);
 
 	return this;
 }
@@ -57,16 +57,16 @@ std::string NetworkService::liveStreamUrl() const
 	return options_->streamLink();
 }
 
-std::string NetworkService::routingPath() const
+bool NetworkService::routingPathEquals(const std::string& path) const
 {
-	return options_->routingPath();
+	return options_->routingPath() == path;
 }
 
 
 socket_t NetworkService::acceptConnection(size_t port) const
 {
-	socket_t client(*ioService_);
-	ip::tcp::acceptor acceptor(*ioService_, ip::tcp::endpoint(ip::tcp::v4(), port)); 
+	socket_t client(*(ioService_.get()));
+	ip::tcp::acceptor acceptor(*(ioService_.get()), ip::tcp::endpoint(ip::tcp::v4(), port));
 	acceptor.accept(client);
 
 	return client;
@@ -82,6 +82,5 @@ std::string NetworkService::readRequestString(socket_t& socket) const
 
 NetworkService::~NetworkService()
 {
-	delete options_;
-	delete ioService_;
+
 }

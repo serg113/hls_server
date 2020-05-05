@@ -24,14 +24,14 @@ void testNetworkService()
 		std::cout << "[start] waiting for connection..." << std::endl;
 
 		auto service = createNetworkService({ "127.0.0.1", "192.168.99.1" })
-			->acceptUsers({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} });
+			->waitAndAuthenticateIncomingConnection({ {"root", "cm9vdDEyMzQ1NgDMzMzMzA=="} });
 
 		std::cout << "\n[ok] connection established and authenticated" << std::endl;
-		if (service->routingPath() == "frames")
+		if (service->routingPathEquals("frames"))
 		{
 			testSavingLiveStreamAsJpeg(service->liveStreamUrl());
 		}
-		else if (service->routingPath() == "record")
+		else if (service->routingPathEquals("record"))
 		{
 			testSavingLiveStreamAsVideo(service->liveStreamUrl());
 		}
